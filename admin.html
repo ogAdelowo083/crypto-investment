@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Crypto Investment</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 30px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 { font-size: 1.4rem; margin: 0; }
+        .admin-header p  { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
+
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .admin-card h2 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .pending-item {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pending-info h4 { color: #333; margin: 0 0 4px; font-size: 0.95rem; }
+        .pending-info p  { color: #666; margin: 0; font-size: 0.85rem; }
+        .pending-info .amount { color: #667eea; font-weight: 700; font-size: 1.1rem; }
+
+        .pending-actions { display: flex; gap: 10px; }
+
+        .btn-approve {
+            padding: 9px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-approve:hover { opacity: 0.85; }
+
+        .btn-reject {
+            padding: 9px 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reject:hover { opacity: 0.85; }
+
+        .no-pending {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            background: #f44336;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .admin-login {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .admin-login h2 { color: #667eea; margin-bottom: 24px; }
+
+        .admin-login input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .admin-login input:focus { outline: none; border-color: #667eea; }
+
+        .admin-login button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-mini {
+            background: white;
+            border-radius: 10px;
+            padding: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .stat-mini h4 { color: #999; font-size: 0.78rem; text-transform: uppercase; margin: 0 0 8px; }
+        .stat-mini p  { color: #333; font-size: 1.3rem; font-weight: 700; margin: 0; }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height:100vh;">
+
+    <!-- Admin Login -->
+    <div class="admin-login" id="adminLogin">
+        <h2>🔐 Admin Panel</h2>
+        <input type="text"     id="adminUser" placeholder="Admin Username">
+        <input type="password" id="adminPass" placeholder="Admin Password">
+        <button onclick="adminLogin()">Login</button>
+        <p id="adminError" style="color:#f44336; margin-top:12px; font-size:0.85rem;"></p>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div class="admin-container" id="adminDashboard" style="display:none;">
+
+        <div class="admin-header">
+            <div>
+                <h1>⚙️ Admin Panel</h1>
+                <p>Manage deposits and users</p>
+            </div>
+            <button onclick="adminLogout()" style="background:rgba(255,255,255,0.2); color:white; border:none; padding:8px 18px; border-radius:8px; cursor:pointer;">
+                Logout
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-mini">
+                <h4>Total Users</h4>
+                <p id="statUsers">0</p>
+            </div>
+            <div class="stat-mini">
+                <h4>Pending Deposits</h4>
+                <p id="statPending" style="color:#ff9800;">0</p>
+            </div>
+            <div class="stat-mini">
+                <h4>Total Deposited</h4>
+                <p id="statDeposited" style="color:#4caf50;">$0</p>
+            </div>
+            <div class="stat-mini">
+                <h4>Total Withdrawn</h4>
+                <p id="statWithdrawn" style="color:#f44336;">$0</p>
+            </div>
+        </div>
+
+        <!-- Pending Deposits -->
+        <div class="admin-card">
+            <h2>⏳ Pending Deposits <span class="badge" id="pendingBadge">0</span></h2>
+            <div id="pendingList"></div>
+        </div>
+
+        <!-- All Users -->
+        <div class="admin-card">
+            <h2>👥 All Users</h2>
+            <div id="usersList"></div>
+        </div>
+
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ── Admin Credentials (change these!) ──
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admin123';
+
+        function adminLogin() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value;
+
+            if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+                document.getElementById('adminLogin').style.display     = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadAdminData();
+            } else {
+                document.getElementById('adminError').textContent = 'Invalid username or password.';
+            }
+        }
+
+        function adminLogout() {
+            document.getElementById('adminLogin').style.display     = 'flex';
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+
+        function loadAdminData() {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Stats
+            let totalDeposited = 0;
+            let totalWithdrawn = 0;
+            let pendingCount   = 0;
+
+            users.forEach(user => {
+                (user.transactions || []).forEach(tx => {
+                    if (tx.type === 'Deposit' && tx.status === 'Completed') totalDeposited += tx.amount;
+                    if (tx.type === 'Withdrawal') totalWithdrawn += tx.amount;
+                    if (tx.type === 'Deposit' && tx.status === 'Pending') pendingCount++;
+                });
+            });
+
+            document.getElementById('statUsers').textContent     = users.length;
+            document.getElementById('statPending').textContent   = pendingCount;
+            document.getElementById('statDeposited').textContent = `$${totalDeposited.toFixed(2)}`;
+            document.getElementById('statWithdrawn').textContent = `$${totalWithdrawn.toFixed(2)}`;
+            document.getElementById('pendingBadge').textContent  = pendingCount;
+
+            // Pending deposits
+            const pendingList = document.getElementById('pendingList');
+            let pendingHTML   = '';
+
+            users.forEach(user => {
+                (user.transactions || []).forEach(tx => {
+                    if (tx.type === 'Deposit' && tx.status === 'Pending') {
+                        pendingHTML += `
+                            <div class="pending-item" id="tx-${tx.id}">
+                                <div class="pending-info">
+                                    <h4>${user.name} <span style="color:#999; font-weight:400;">(${user.email})</span></h4>
+                                    <p>${tx.date} · ${tx.crypto} · Hash: ${tx.details}</p>
+                                    <p class="amount">$${tx.amount.toFixed(2)}</p>
+                                </div>
+                                <div class="pending-actions">
+                                    <button class="btn-approve" onclick="approveDeposit('${user.id}', ${tx.id})">✅ Approve</button>
+                                    <button class="btn-reject"  onclick="rejectDeposit('${user.id}',  ${tx.id})">❌ Reject</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            });
+
+            pendingList.innerHTML = pendingHTML || '<p class="no-pending">✅ No pending deposits</p>';
+
+            // All users
+            const usersList = document.getElementById('usersList');
+            if (users.length === 0) {
+                usersList.innerHTML = '<p class="no-pending">No users registered yet.</p>';
+                return;
+            }
+
+            usersList.innerHTML = users.map(user => `
+                <div class="pending-item" style="border-left-color:#667eea;">
+                    <div class="pending-info">
+                        <h4>${user.name}</h4>
+                        <p>${user.email} · Joined: ${user.memberSince || 'N/A'}</p>
+                        <p>
+                            Balance: <strong style="color:#667eea;">$${(user.balance || 0).toFixed(2)}</strong> &nbsp;|&nbsp;
+                            Invested: <strong style="color:#4caf50;">$${(user.invested || 0).toFixed(2)}</strong> &nbsp;|&nbsp;
+                            Transactions: <strong>${(user.transactions || []).length}</strong>
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveDeposit(userId, txId) {
+            const users     = JSON.parse(localStorage.getItem('users')) || [];
+            const userIndex = users.findIndex(u => u.id == userId);
+            if (userIndex === -1) return;
+
+            const txIndex = users[userIndex].transactions.findIndex(t => t.id === txId);
+            if (txIndex === -1) return;
+
+            const amount = users[userIndex].transactions[txIndex].amount;
+            users[userIndex].transactions[txIndex].status = 'Completed';
+            users[userIndex].balance = (users[userIndex].balance || 0) + amount;
+
+            // Update currentUser if they are logged in
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.id == userId) {
+                localStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
+            }
+
+            localStorage.setItem('users', JSON.stringify(users));
+
+            document.getElementById(`tx-${txId}`).remove();
+            showToast(`✅ Deposit of $${amount.toFixed(2)} approved!`);
+            loadAdminData();
+        }
+
+        function rejectDeposit(userId, txId) {
+            const users     = JSON.parse(localStorage.getItem('users')) || [];
+            const userIndex = users.findIndex(u => u.id == userId);
+            if (userIndex === -1) return;
+
+            const txIndex = users[userIndex].transactions.findIndex(t => t.id === txId);
+            if (txIndex === -1) return;
+
+            const amount = users[userIndex].transactions[txIndex].amount;
+            users[userIndex].transactions[txIndex].status = 'Failed';
+
+            localStorage.setItem('users', JSON.stringify(users));
+
+            document.getElementById(`tx-${txId}`).remove();
+            showToast(`❌ Deposit of $${amount.toFixed(2)} rejected.`, true);
+            loadAdminData();
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className   = 'toast' + (isError ? ' error' : '');
+            void toast.offsetWidth;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            if (document.getElementById('adminDashboard').style.display !== 'none') {
+                loadAdminData();
+            }
+        }, 30000);
+    </script>
+
+</body>
+</html>
