@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Investment Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+    <body>
+    
+    <div class="container">
+        <div class="auth-box">
+            <h1>Crypto Investment Platform</h1>
+            <div id="loginForm" class="form-container">
+                <h2>Login</h2>
+                <form onsubmit="login(event)">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+            </div>
+            <div id="registerForm" class="form-container hidden">
+                <h2>Register</h2>
+                <form onsubmit="register(event)">
+                    <input type="text" id="regName" placeholder="Full Name" required>
+                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <input type="password" id="regPassword" placeholder="Password" required>
+                    <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
+                    <button type="submit">Register</button>
+                </form>
+                <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+
+    <div class="activity-popup" id="activityPopup">
+        <div class="activity-icon" id="activityIcon"></div>
+        <div class="activity-text">
+            <strong id="activityTitle"></strong>
+            <span id="activitySub"></span>
+        </div>
+        <div class="activity-dot"></div>
+    </div>
+
+
+    <script>
+const fakeNames = [
+    "James O.", "Amara K.", "David L.", "Fatima B.", "Michael T.",
+    "Ngozi A.", "Chris M.", "Blessing E.", "Samuel R.", "Aisha Y.",
+    "Kevin W.", "Chioma N.", "Daniel F.", "Grace I.", "Peter S.",
+    "Zara H.", "Emmanuel C.", "Linda U.", "Victor J.", "Mary Q."
+];
+
+const activities = [
+    {
+        type: 'invest',
+        icon: '📈',
+        generate: () => {
+            const name    = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+            const plans   = ['Starter', 'Premium', 'Pro'];
+            const plan    = plans[Math.floor(Math.random() * plans.length)];
+            const amounts = { Starter: [200,300,400], Premium: [500,750,1000], Pro: [1000,2000,5000] };
+            const amount  = amounts[plan][Math.floor(Math.random() * 3)];
+            return {
+                title: `${name} just invested $${amount.toLocaleString()}`,
+                sub:   `${plan} Plan · just now`
+            };
+        }
+    },
+    {
+        type: 'deposit',
+        icon: '💰',
+        generate: () => {
+            const name   = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+            const amount = [100, 250, 500, 1000, 2000, 5000][Math.floor(Math.random() * 6)];
+            const coins  = ['BTC', 'ETH', 'USDT'];
+            const coin   = coins[Math.floor(Math.random() * coins.length)];
+            return {
+                title: `${name} deposited $${amount.toLocaleString()}`,
+                sub:   `via ${coin} · just now`
+            };
+        }
+    },
+    {
+        type: 'withdraw',
+        icon: '🏦',
+        generate: () => {
+            const name   = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+            const amount = [150, 300, 500, 800, 1200][Math.floor(Math.random() * 5)];
+            const coins  = ['BTC', 'ETH', 'USDT'];
+            const coin   = coins[Math.floor(Math.random() * coins.length)];
+            return {
+                title: `${name} withdrew $${amount.toLocaleString()}`,
+                sub:   `via ${coin} · just now`
+            };
+        }
+    }
+];
+
+function showActivityPopup() {
+    const popup    = document.getElementById('activityPopup');
+    const activity = activities[Math.floor(Math.random() * activities.length)];
+    const data     = activity.generate();
+
+    document.getElementById('activityIcon').textContent  = activity.icon;
+    document.getElementById('activityTitle').textContent = data.title;
+    document.getElementById('activitySub').textContent   = data.sub;
+
+    popup.className = `activity-popup ${activity.type}`;
+    void popup.offsetWidth;
+    popup.classList.add('show');
+
+    // Hide after 2.5 seconds then schedule next one
+    setTimeout(() => {
+        popup.classList.remove('show');
+
+        // Show next popup after 2-4 seconds
+        const nextDelay = Math.random() * 2500 + 2000;
+        setTimeout(showActivityPopup, nextDelay);
+    }, 4500);
+}
+
+// Start after 2 seconds
+setTimeout(showActivityPopup, 4500);
+</script>
+
+
+<!-- Crypto Live Ticker -->
+<div id="cryptoTicker" style="
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    z-index: 9998;
+    min-width: 200px;
+    border-top: 3px solid #667eea;
+">
+    <div style="font-size:0.75rem; font-weight:700; color:#667eea; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">
+        🔴 Live Prices
+    </div>
+    <div id="tickerList"></div>
+</div>
+
+<script>
+const cryptoData = {
+    BTC:  { name: 'Bitcoin',  price: 67000, icon: '₿' },
+    ETH:  { name: 'Ethereum', price: 3500,  icon: 'Ξ' },
+    USDT: { name: 'Tether',   price: 1.00,  icon: '₮' },
+    BNB:  { name: 'BNB',      price: 580,   icon: 'B' },
+    SOL:  { name: 'Solana',   price: 170,   icon: 'S' },
+    XRP:  { name: 'XRP',      price: 0.52,  icon: 'X' },
+};
+
+const changes = {};
+Object.keys(cryptoData).forEach(k => changes[k] = (Math.random() * 6 - 3).toFixed(2));
+
+function updateTicker() {
+    Object.keys(cryptoData).forEach(key => {
+        const coin   = cryptoData[key];
+        const change = parseFloat(changes[key]);
+
+        // Simulate small price movement
+        const movement = coin.price * (Math.random() * 0.002 - 0.001);
+        coin.price    += movement;
+
+        // Occasionally shift change %
+        changes[key] = (parseFloat(changes[key]) + (Math.random() * 0.1 - 0.05)).toFixed(2);
+    });
+
+    renderTicker();
+}
+
+function renderTicker() {
+    const list = document.getElementById('tickerList');
+    if (!list) return;
+
+    list.innerHTML = Object.keys(cryptoData).map(key => {
+        const coin   = cryptoData[key];
+        const change = parseFloat(changes[key]);
+        const isUp   = change >= 0;
+        const arrow  = isUp ? '▲' : '▼';
+        const color  = isUp ? '#4caf50' : '#f44336';
+        const price  = coin.price >= 1
+            ? coin.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : coin.price.toFixed(4);
+
+        return `
+            <div style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 7px 0;
+                border-bottom: 1px solid #f0f0f0;
+                gap: 12px;
+            ">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="
+                        width: 28px; height: 28px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        display: flex; align-items: center; justify-content: center;
+                        color: white; font-size: 0.75rem; font-weight: 700;
+                        flex-shrink: 0;
+                    ">${coin.icon}</div>
+                    <div>
+                        <div style="font-size:0.82rem; font-weight:700; color:#333;">${key}</div>
+                        <div style="font-size:0.7rem; color:#999;">${coin.name}</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:0.82rem; font-weight:700; color:#333;">$${price}</div>
+                    <div style="font-size:0.72rem; font-weight:600; color:${color};">
+                        ${arrow} ${Math.abs(change)}%
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Initial render
+renderTicker();
+
+// Update every 2 seconds
+setInterval(updateTicker, 2000);
+</script>
+    
+</body>
+</html>
